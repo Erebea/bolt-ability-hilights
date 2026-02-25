@@ -1,6 +1,7 @@
 # bolt-ability-hilights
 FFXIV Inspired Ability Hilighting for RS3, made specifically for Bolt: https://codeberg.com/Adamcake/Bolt
 
+The aim of this plugin is to hilight certain abilities when you are expected to use them or when they are desirable to use, within reason.
 
 Previews:
 None yet
