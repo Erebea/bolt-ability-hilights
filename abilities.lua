@@ -16,5 +16,5 @@ abilities = {
   cmdzom = {},
   cmdphant = {},
   skulls = {},
-  volley = {},
+  necroauto = {},
 }
