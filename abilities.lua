@@ -16,4 +16,5 @@ abilities = {
   cmdzom = {},
   cmdphant = {},
   skulls = {},
+  volley = {},
 }
