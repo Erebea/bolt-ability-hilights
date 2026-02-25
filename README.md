@@ -7,7 +7,9 @@ The aim of this plugin is to hilight certain abilities when you are expected to 
 
 Previews:
 
-![Bloodlust and gbarge highlight demo](/assets/preview.mp4)
+https://github.com/user-attachments/assets/89fbdd96-a4d1-48e8-b6d3-3e247bedd94b
+
+
 
 # Installation
 Go to your plugins on the bolt launcher and click "Install plugin from updater url", paste https://raw.githubusercontent.com/Erebea/bolt-ability-hilights/refs/heads/master/meta.json, and enter
