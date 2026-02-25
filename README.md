@@ -6,6 +6,7 @@ The aim of this plugin is to hilight certain abilities when you are expected to 
 **DISCLAIMER: This was built in the combat beta and many hilights depend on the new icon graphics introduced**
 
 Previews:
+
 ![Bloodlust and gbarge highlight demo](/assets/preview.mp4)
 
 # Installation
