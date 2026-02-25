@@ -3,6 +3,8 @@ FFXIV Inspired Ability Hilighting for RS3, made specifically for Bolt: https://c
 
 The aim of this plugin is to hilight certain abilities when you are expected to use them or when they are desirable to use, within reason.
 
+**DISCLAIMER: This was built in the combat beta and many hilights depend on the new icon graphics introduced**
+
 Previews:
 None yet
 
