@@ -71,6 +71,7 @@ elements = {
   bankpresets = {},
   slotbg = {},
   slotinput = {},
+  cdnum = {},
 }
 
 equipment = {
@@ -336,20 +337,23 @@ local setbuffdetails = function (buff, number, parensnumber)
 end
 
 
-setuidetails = function (element, exists, x, y)
+setuidetails = function (element, exists, x, y, xs, ys)
   if x then
     element.x = x
     element.y = y
+    element.xs = xs
+    element.ys = ys
     element.active = true
     element.foundoncheckframe = true
   end
 end
 
-setabilitydetails = function (ability, exists, x, y, size, scale)
+setabilitydetails = function (ability, exists, x, y, size, scale, isoncd)
   if x then
     ability.x = x
     ability.y = y
     ability.active = true
+    ability.isoncd = isoncd
     ability.foundoncheckframe = true
     ability.hilight = false
     ability.size = size
@@ -364,13 +368,15 @@ bolt.onrendergameview( function (event)
   gamewidth, gameheight = event:size()
 end)
 
+elements.slotbg = {}
+elements.cdnum = {}
+current_instance = {}
+
 bolt.onrender2d(function (event)
   local t = bolt.time()
   if not checkframe then return end
-
-  if recreate_window_deferred then
-    recreate_window_deferred = false
-    setupGaugeWindow()
+  for i = 1, #elements.cdnum do
+    elements.cdnum[i] = nil
   end
 
   if nextrender2dbuff or nextrender2ddebuff then
@@ -383,14 +389,13 @@ bolt.onrender2d(function (event)
     nextrender2ddebuff = nil
   end
 
-  elements.slotbg = {}
-
   local vertexcount = event:vertexcount()
   local verticesperimage = event:verticesperimage()
   for i = 1, vertexcount, verticesperimage do
     local ax, ay, aw, ah, _, _ = event:vertexatlasdetails(i)
     if checkframe then
       local pxleft, pxtop = event:vertexxy(i + 2)
+      local pxlefts, pxtops = event:vertexscaledxy(i + 2)
 
       -- helper that calls tryreadbuffdetails with relevant upvalues for this specific image
       -- expectbuff is true if this is expected to be a buff (green), false if debuff (red)
@@ -399,9 +404,9 @@ bolt.onrender2d(function (event)
         if valid and isbuff == expectbuff then setbuffdetails(buff, number, parensnumber) end
       end
       local readuielement = function (element, exists)
-        setuidetails(element, exists, pxleft, pxtop)
+        setuidetails(element, exists, pxleft, pxtop, pxlefts, pxtops)
       end
-      if aw == 10 then 
+      if aw == 10 then
           if event:texturecompare(ax, ay + 5, "\x26\x20\x1c\x75\x31\x2b\x27\xc3\x03\x01\x00\xb3\x03\x01\x00\xa3\x03\x01\x00\x98\x03\x01\x00\x90\x03\x01\x00\x8c\x03\x01\x00\x8c\x03\x01\x00\x8c\x03\x01\x00\x8c") then
 
             local current_instance = {}
@@ -415,27 +420,104 @@ bolt.onrender2d(function (event)
             table.insert(elements.slotinput, current_instance)
           end
       end
+      if aw == 14 and ah == 28 then
+          --0
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --1
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc0\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\x00\x00\x00\x00\x00") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --2
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\xff\x03\x03\x03\xff\xfb\xfb\xfb\xff\xff\xff\xff\xff\xff\xff\xff\xff\x44\x44\x44\xff\x00\x00\x00\xff\x00\x00\x00\x77") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --3
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xaf\x00\x00\x00\xff\x35\x35\x35\xff\x45\x45\x45\xff\x61\x61\x61\xff\xbc\xbc\xbc\xff\xff\xff\xff\xff\xff\xff\xff\xff\xdd\xdd\xdd\xff\x03\x03\x03\xff\x00\x00\x00\xff\x00\x00\x00\x3a") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --4
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\x00\x00\x00\x00\x24\x00\x00\x00\xff\x00\x00\x00\xff\xc5\xc5\xc5\xff\xff\xff\xff\xff\xe0\xe0\xe0\xff\x00\x00\x00\xff\xe1\xe1\xe1\xff\xff\xff\xff\xff\xff\xff\xff\xff\x49\x49\x49\xff\x00\x00\x00\xff\x00\x00\x00\x6d") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --5
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\xd6\x00\x00\x00\xff\xd2\xd2\xd2\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xdc\xdc\xdc\xff\x3b\x3b\x3b\xff\x00\x00\x00\xff\x00\x00\x00\xe0\x00\x00\x00\x00") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --6
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\xff\x00\x00\x00\xff\xfe\xfe\xfe\xff\xff\xff\xff\xff\xfe\xfe\xfe\xff\x4c\x4c\x4c\xff\xf7\xf7\xf7\xff\xff\xff\xff\xff\xff\xff\xff\xff\xeb\xeb\xeb\xff\x50\x50\x50\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\x00") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --7
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\x00\x00\x00\xff\xd4\xd4\xd4\xff\xff\xff\xff\xff\xff\xff\xff\xff\x67\x67\x67\xff\x00\x00\x00\xff\x00\x00\x00\x80\x00\x00\x00\x00") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --8
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\x2b\x00\x00\x00\xff\x00\x00\x00\xff\xdf\xdf\xdf\xff\xff\xff\xff\xff\xff\xff\xff\xff\xee\xee\xee\xff\xe7\xe7\xe7\xff\xff\xff\xff\xff\xff\xff\xff\xff\xc5\xc5\xc5\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\x28") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+          --9
+          if event:texturecompare(ax, ay + 14, "\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x19\x19\x19\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff") then
+            readuielement(current_instance, true)
+            table.insert(elements.cdnum, current_instance)
+          end
+      end
       local readability = function (ability, exists)
         --local valid, number, parensnumber, isbuff = modules.buffs:tryreadbuffdetails(event, i + verticesperimage, pxleft, pxtop)
         local pxlefts, pxtops = event:vertexscaledxy(i + 2)
-        local margin = 10
+        local pxleft, pxtop = event:vertexxy(i + 2)
+        local marginbg = 10
+        local margincd = 2
         local checkx = pxleft
         local checky = pxtop
-        local proceed = false
-        for i = 1, #elements.slotbg do
-            local slot = elements.slotbg[i]
+        local isability = false
+        local isoncd = false 
+        for b = 1, #elements.slotbg do
+            local slot = elements.slotbg[b]
             local diffx = math.abs(slot.x - checkx)
             local diffy = math.abs(slot.y - checky)
-            if diffx > margin or diffy > margin then
-              proceed = false
+            if diffx > marginbg or diffy > marginbg then
+              isability = false
             else
-              proceed = true
+              isability = true
+              break
+            end
+        end
+
+        for c = 1, #elements.cdnum do
+            local cd = elements.cdnum[c]
+
+            -- Object A (30x30)
+            local x1, y1 = pxleft, pxtop
+            local w1, h1 = 30, 30
+
+            -- Object B (14x28)
+            local x2, y2 = cd.x, cd.y
+            local w2, h2 = 14, 28
+
+            -- The Overlap Check
+            if x1 < x2 + w2 and
+               x2 < x1 + w1 and
+               y1 < y2 + h2 and
+               y2 < y1 + h1 then
+                isoncd = true
+                break
             end
         end
 
         local size = event:targetsize(i)
         local scale = event:targetscale(i)
-        if proceed then setabilitydetails(ability, exists, pxlefts, pxtops, size, scale) end
+        if isability then setabilitydetails(ability, exists, pxlefts, pxtops, size, scale, isoncd) end
       end
       if aw == ah then
         if aw == 60 then
