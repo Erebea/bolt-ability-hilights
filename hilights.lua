@@ -1,9 +1,9 @@
 drawhilights = function()
 
-  abilities.combust.hilight = buffs.conflagrate.active
+  abilities.combust.hilight = buffs.conflagrate.active and not abilities.combust.isoncd
   abilities.sonic.hilight   = buffs.runiccharge.active
   abilities.conc.hilight    = buffs.runiccharge.active
-  abilities.dbreath.hilight = (buffs.runiccharge.active or buffs.combust.active)
+  abilities.dbreath.hilight = (buffs.runiccharge.active or buffs.combust.active) and not abilities.dbreath.isoncd
 
   abilities.assault.hilight = buffs.bloodlust.active and (buffs.bloodlust.number or 0) >= 4 or false
   abilities.flurry.hilight = buffs.bloodlust.active and (buffs.bloodlust.number or 0) >= 4 or false
