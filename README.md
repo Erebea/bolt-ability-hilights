@@ -16,5 +16,5 @@ Go to your plugins on the bolt launcher and click "Install plugin from updater u
 
 # todo
 
-- recognize ability cooldowns
+✅ recognize ability cooldowns
 - desirable combo hilighting?
