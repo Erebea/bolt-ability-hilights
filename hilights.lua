@@ -9,7 +9,7 @@ drawhilights = function()
   abilities.flurry.hilight = buffs.bloodlust.active and (buffs.bloodlust.number or 0) >= 4 or false
   abilities.hurricane.hilight = buffs.bloodlust.active and (buffs.bloodlust.number or 0) >= 4 or false
   abilities.gbarge.hilight = buffs.gbarge.active
-  abilities.overpower.hilight = buffs.berserk.active
+  abilities.overpower.hilight = buffs.berserk.active and not abilities.overpower.isoncd
 
   abilities.finger.hilight = buffs.necrosis.active and (buffs.necrosis.number or 0) >= 6 or false
   abilities.volley.hilight = buffs.residualsouls.active and ((equipment.t95lantern.x and (buffs.residualsouls.parensnumber or buffs.residualsouls.number or 0) == 5) or (not equipment.t95lantern.x and (buffs.residualsouls.parensnumber or buffs.residualsouls.number or 0) == 3))

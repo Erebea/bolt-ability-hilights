@@ -79,6 +79,8 @@ equipment = {
   t95guard = {},
 }
 
+uiscale = 0
+
 require("abilities")
 require("hilights")
 
@@ -138,21 +140,18 @@ end
 hhimg = images.hilighthorizontal
 hvimg = images.hilightvertical
 
-hv = 0
-hh = 0
-
 hilightabilities = function()
 
   hh = hh or 0
   hv = hv or 0
 
   if checkframe then
-    hv = hv + 1
-    hh = hh + 1
+    hv = hv + (1 * uiscale)
+    hh = hh + (1 * uiscale)
   end
 
-  if math.abs(hv) >= 16 then hv = 0 end
-  if math.abs(hh) >= 16 then hh = 0 end
+  if hv >= (16 * uiscale) then hv = 0 end
+  if hh >= (16 * uiscale) then hh = 0 end
 
   for name, ability in pairs(abilities) do
     if ability.hilight and ability.active then
@@ -163,40 +162,12 @@ hilightabilities = function()
       local hx = x - 2
       local hy = y - 2
 
-      hhimg.surface:drawtoscreen(hh, 0, 32, hhimg.height, hx + (2 * ability.scale), hy, 32 * ability.scale, hhimg.height * ability.scale)
-      hvimg.surface:drawtoscreen(0, hv, hvimg.width, 32, hx, hy + (32 * ability.scale), hvimg.width * ability.scale, -32 * ability.scale)
-      hhimg.surface:drawtoscreen(hh, 0, 32, hhimg.height, hx + (32 * ability.scale), hy + (32 * ability.scale), -32 * ability.scale, hhimg.height * ability.scale)
-      hvimg.surface:drawtoscreen(0, hv, hvimg.width, 32, hx + (32 * ability.scale), hy + (2 * ability.scale), hvimg.width * ability.scale, 32 * ability.scale)
+      hhimg.surface:drawtoscreen(hh * uiscale, 0, 32, hhimg.height, hx + (2 * ability.scale), hy, 32 * ability.scale, hhimg.height * ability.scale)
+      hvimg.surface:drawtoscreen(0, hv * uiscale, hvimg.width, 32, hx, hy + (32 * ability.scale), hvimg.width * ability.scale, -32 * ability.scale)
+      hhimg.surface:drawtoscreen(hh * uiscale, 0, 32, hhimg.height, hx + (32 * ability.scale), hy + (32 * ability.scale), -32 * ability.scale, hhimg.height * ability.scale)
+      hvimg.surface:drawtoscreen(0, hv * uiscale, hvimg.width, 32, hx + (32 * ability.scale), hy + (2 * ability.scale), hvimg.width * ability.scale, 32 * ability.scale)
     end
   end
-end
-
-local function drawbox (worldpoint, viewmatrix, projmatrix, boxradius, boxthickness)
-  local px, py, pz = worldpoint:transform(viewmatrix):get()
-  local left, top, depth = bolt.point(px - boxradius, py + boxradius, pz):transform(projmatrix):aspixels()
-  local right, bottom, _ = bolt.point(px + boxradius, py - boxradius, pz):transform(projmatrix):aspixels()
-  local leftinner, topinner, _ = bolt.point(px + boxthickness - boxradius, py + boxradius - boxthickness, pz):transform(projmatrix):aspixels()
-  if depth < 0.0 or depth > 1.0 then return end
-  left = math.floor(left)
-  top = math.floor(top)
-  right = math.floor(right)
-  bottom = math.floor(bottom)
-  local width = right - left
-  local height = bottom - top
-  local edgew = leftinner - left
-  local edgeh = topinner - top
-  redpixel:drawtoscreen(0, 0, 1, 1, left, top, width, edgeh) -- top
-  redpixel:drawtoscreen(0, 0, 1, 1, left, top, edgew, height) -- left
-  redpixel:drawtoscreen(0, 0, 1, 1, right - edgew, top, edgew, height) -- right
-  redpixel:drawtoscreen(0, 0, 1, 1, left, bottom - edgeh, width, edgeh) -- bottom
-  blackpixel:drawtoscreen(0, 0, 1, 1, left, top, width, 1) -- top
-  blackpixel:drawtoscreen(0, 0, 1, 1, left, top, 1, height) -- left
-  blackpixel:drawtoscreen(0, 0, 1, 1, right - 1, top, 1, height) -- right
-  blackpixel:drawtoscreen(0, 0, 1, 1, left, bottom - 1, width, 1) -- bottom
-  blackpixel:drawtoscreen(0, 0, 1, 1, left + edgew, top + edgeh, width - (edgew * 2), 1) -- top
-  blackpixel:drawtoscreen(0, 0, 1, 1, left + edgew, top + edgeh, 1, height - (edgeh * 2)) -- left
-  blackpixel:drawtoscreen(0, 0, 1, 1, right - (edgew + 1), top + edgeh, 1, height - (edgeh * 2)) -- right
-  blackpixel:drawtoscreen(0, 0, 1, 1, left + edgew, bottom - (edgeh + 1), width - (edgew * 2), 1) -- bottom
 end
 
 stats = {
@@ -390,6 +361,7 @@ bolt.onrender2d(function (event)
 
 
   for i = 1, vertexcount, verticesperimage do
+    uiscale = event:targetscale(i)
     local ax, ay, aw, ah, _, _ = event:vertexatlasdetails(i)
     if checkframe then
       local pxleft, pxtop = event:vertexxy(i + 2)
@@ -501,7 +473,6 @@ bolt.onrender2d(function (event)
             local x2, y2 = cd.x, cd.y
             local w2, h2 = 14, 28
 
-            --print(x1, y1, " - ", x2, y2)
             if x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1 then
                 isoncd = true
                 break
