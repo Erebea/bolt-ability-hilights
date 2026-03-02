@@ -17,4 +17,6 @@ abilities = {
   cmdphant = {},
   skulls = {},
   necroauto = {},
+  shtendrils ={},
+  rapidfire = {},
 }
