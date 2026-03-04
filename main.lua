@@ -443,7 +443,7 @@ bolt.onrender2d(function (event)
         setuidetails(element, exists, pxleft, pxtop, pxlefts, pxtops)
       end
       local readability = function (ability, exists)
-        --local valid, number, parensnumber, isbuff = modules.buffs:tryreadbuffdetails(event, i + verticesperimage, pxleft, pxtop)
+        local isbuff, number, parensnumber, isbuff = modules.buffs:tryreadbuffdetails(event, i + verticesperimage, pxleft, pxtop)
         local pxlefts, pxtops = event:vertexscaledxy(i + 2)
         local pxleft, pxtop = event:vertexxy(i + 2)
         local marginbg = 10
@@ -470,7 +470,7 @@ bolt.onrender2d(function (event)
             local x1, y1 = pxleft, pxtop
             local w1, h1 = 30, 30
             local x2, y2 = cd.x, cd.y
-            local w2, h2 = 14, 28
+            local w2, h2 = 7, 10
 
             if x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1 then
                 isoncd = true
@@ -480,7 +480,7 @@ bolt.onrender2d(function (event)
 
         local size = event:targetsize(i)
         local scale = event:targetscale(i)
-        if isability then setabilitydetails(ability, exists, pxlefts, pxtops, size, scale, isoncd) end
+        if isability and not isbuff then setabilitydetails(ability, exists, pxlefts, pxtops, size, scale, isoncd) end
       end
       if aw == ah then
         if aw == 60 then
