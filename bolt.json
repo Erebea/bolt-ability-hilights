@@ -1,6 +1,6 @@
 {
     "main": "main.lua",
     "name": "RS3 Ability Hilighting",
-    "version":  "0.2",
+    "version":  "0.3",
     "description":  "Ability Hilighting for RS3"
 }
