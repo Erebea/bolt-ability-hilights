@@ -12,11 +12,25 @@ https://github.com/user-attachments/assets/89fbdd96-a4d1-48e8-b6d3-3e247bedd94b
 ## Default Hilights
 
 - Hilights **gconc**, **dbreath**, and **gsonic** when **runic charge is used**
+- Hilights **dbreath** when **target is inflicted with combust**
+- Hilights **combust** when the **conflagrate buff is active**
+- Hilights **sunshine** when it is available to be used (**not grey or on cooldown**)
+- Hilights **tsunami** when it is available to be used **while sunshine is active**
+- Hilights **omnipower** when it is available to be used **while tsunami and sunshine are active**
+
 - Hilights **flurry**, **hurricane**, and **assault** when you **have 4 or more bloodlust stacks**
 - Hilights **gbarge** when **its effect is ready**
-- Hilights **death skulls** and **overpower** when under **living death** and **berserk** respectively
+- Hilights **meteor strike** when it is available to be used (**not grey or on cooldown**)
+- Hilights **berserk** when it is available to be used **while meteor strike is active**
+- Hilights **overpower** while **berserk is active**
+  
 - Hilights **rapid fire** when under **galeshot** buff
 - Hilights **shadow tendrils** when under **imbue shadows** buff
+- Hilights **death's swiftness** when it is available to be used (**not grey or on cooldown**)
+- Hilights **imbue shadows** when it is avaiable **while death's swiftness is active**
+
+- Hilights **living death** when it is available to be used (**not grey or on cooldown**)
+- Hilights **death skulls** while **living death is active**
 - Hilights **volley of souls** when you **have 3 or 5 residual souls**
 - Hilights **finger of death** when you **have 4 or more necrosis stacks**
 - Hilights **necro auto** when under the **death spark/soul reaver ready buff**
