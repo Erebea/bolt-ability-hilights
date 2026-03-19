@@ -4,6 +4,9 @@ abilities = {
   tsunami = {},
   sonic = {},
   conc = {},
+  wildmagic = {},
+  cblast = {},
+  smtendrils = {},
   sunshine = {},
   omnipower = {},
   assault = {},
@@ -26,4 +29,7 @@ abilities = {
   rapidfire = {},
   deathsswiftness = {},
   shadows = {},
+  galeshot = {},
+  eof = {},
+  spec = {},
 }
