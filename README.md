@@ -3,13 +3,15 @@ FFXIV Inspired Ability Hilighting for RS3, made specifically for Bolt: https://c
 
 The aim of this plugin is to hilight certain abilities when you are expected to use them or when they are desirable to use, within reason.
 
-**Technically works with interface scaling other than 100%, but does not look good.**
+**100% compatible with interface scaling with no extra compromises**
 
 ## Previews:
 
-https://github.com/user-attachments/assets/89fbdd96-a4d1-48e8-b6d3-3e247bedd94b
+https://github.com/user-attachments/assets/a6cd298b-0b1f-4e37-9ebb-7b76cf63d80a
 
-## Default Hilights
+
+
+## Default Simple Hilights
 
 - Hilights **gconc**, **dbreath**, and **gsonic** when **runic charge is used**
 - Hilights **dbreath** when **target is inflicted with combust**
