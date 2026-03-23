@@ -33,6 +33,6 @@ drawhilights = function()
   abilities.necroauto.hilight = buffs.deathspark.active
   abilities.livingdeath.hilight = not abilities.livingdeath.isgrey and not buffs.livingdeath.active and not abilities.livingdeath.isoncd
 
-  hilightabilities()
+  hilightabilities2()
 
 end
