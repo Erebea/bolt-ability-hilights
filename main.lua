@@ -121,6 +121,11 @@ cdchars = {
   ['\x00\x00\x00\x9e\x00\x00\x00\xff\x6a\x6a\x6a\xff\xff\xff\xff\xff\xff\xff\xff\xff\x67\x67\x67\xff\x00\x00\x00\xff\x00\x00\x00\x9e'] = ':', -- @:
 }
 
+cdcharstop = { 
+  ['\x26\x20\x1c\x75\x31\x2b\x27\xc3\x03\x01\x00\xb3\x03\x01\x00\xa3\x03\x01\x00\x98\x03\x01\x00\x90\x03\x01\x00\x8c\x03\x01\x00\x8c\x03\x01\x00\x8c\x03\x01\x00\x8c'] = "END_OF_TEXT",
+  ['\xdc\xb5\x76\x75\xea\xc3\x84\xc3\x29\x23\x1f\xb3\x2c\x26\x22\xa3\x2e\x28\x24\x98\x31\x2b\x27\x90\x33\x2d\x29\x8c\x33\x2d\x29\x8c\x33\x2d\x29\x8c\x33\x2d\x29\x8c'] = "END_OF_TEXT",
+}
+
 cbstyle = "none"
 uiscale = 0
 
@@ -137,10 +142,21 @@ pz = {}
 
 -- table of png images ("true" is used as a placeholder value for each one)
 images = {
+  outline = true,
+  outlinegrey = true,
+  outlinehighprio = true,
   hilighthorizontal = true,
   hilightvertical = true,
   hilighthorizontalgrey = true,
   hilightverticalgrey = true,
+  hilighthorizontalhighprio = true,
+  hilightverticalhighprio = true,
+  ['single-h'] = true,
+  ['single-h-grey'] = true,
+  ['single-h-highprio'] = true,
+  ['single-v'] = true,
+  ['single-v-grey'] = true,
+  ['single-v-highprio'] = true,
 }
 
 -- sets up initial states of `images` and `bars`
@@ -182,6 +198,7 @@ numparse = function (num, size)
   return digit1, digit2
 end
 
+--[[
 hilightabilities = function()
 
   hh = hh or 0
@@ -204,6 +221,10 @@ hilightabilities = function()
         hhimg = images.hilighthorizontal
         hvimg = images.hilightvertical
       end
+      if ability.highprio ~= nil then
+        hhimg = images.hilighthorizontalhighprio
+        hvimg = images.hilightverticalhighprio
+      end
       local x = ability.x
       local y = ability.y
 
@@ -216,6 +237,134 @@ hilightabilities = function()
       hvimg.surface:drawtoscreen(0, hv * uiscale, hvimg.width, 32, hx + (32 * ability.scale), hy + (2 * ability.scale), hvimg.width * ability.scale, 32 * ability.scale)
     end
   end
+end
+]]--
+
+dash_timer = dash_timer or 0
+
+hilightabilities = function()
+    local scale = uiscale or 1
+    if scale <= 0 then scale = 1 end
+    
+    local base_size = 32
+    local actual_size = base_size * scale
+    local dash_spacing = 8 * scale
+    local dash_speed = 1 * scale
+    local pixel = 1 * scale -- The offset for the top side
+
+    if checkframe then
+        dash_timer = (dash_timer + dash_speed) % dash_spacing
+    end
+
+    for name, ability in pairs(abilities) do
+        if ability.hilight and ability.active then
+            local img_h, img_v
+            if ability.isgrey then
+                img_h, img_v = images['single-h-grey'], images['single-v-grey']
+            elseif ability.highprio ~= nil then
+                img_h, img_v = images['single-h-highprio'], images['single-v-highprio']
+            else
+                img_h, img_v = images['single-h'], images['single-v']
+            end
+
+            if img_h and img_v and img_h.surface then
+                local hx, hy = ability.x - (2 * scale), ability.y - (2 * scale)
+                local dw_h, dh_h = img_h.width * scale, img_h.height * scale
+                local dw_v, dh_v = img_v.width * scale, img_v.height * scale
+
+                for d = -dash_spacing, actual_size + dash_spacing, dash_spacing do
+                    local dist = (d + dash_timer) % dash_spacing + d
+                    --img_h.surface:setalpha(0.33)
+                    --img_v.surface:setalpha(0.33)
+                    -- 1. TOP SIDE: Hiding 1px from the Left (KEPT)
+                    local rev_t = actual_size - dist
+                    local draw_x = hx + rev_t - dw_h
+                    local v_x = math.max(hx + pixel, math.min(hx + actual_size, draw_x))
+                    local v_w = math.min(hx + actual_size, draw_x + dw_h) - v_x
+                    if v_w > 0 then
+                        local s_x = (v_x > draw_x) and ((v_x - draw_x) / dw_h * img_h.width) or 0
+                        local final_sx = img_h.width - (v_w / dw_h * img_h.width) - s_x
+                        img_h.surface:drawtoscreen(final_sx, 0, (v_w / dw_h * img_h.width), img_h.height, v_x, hy, v_w, dh_h)
+                    end
+
+                    -- 2. RIGHT SIDE: Reverted (Now starts at hy)
+                    local rev_r = actual_size - dist
+                    local draw_y = hy + rev_r - dh_v
+                    local v_y = math.max(hy, math.min(hy + actual_size, draw_y))
+                    local v_h = math.min(hy + actual_size, draw_y + dh_v) - v_y
+                    if v_h > 0 then
+                        local s_y = (v_y > draw_y) and ((v_y - draw_y) / dh_v * img_v.height) or 0
+                        local final_sy = img_v.height - (v_h / dh_v * img_v.height) - s_y
+                        img_v.surface:drawtoscreen(0, final_sy, img_v.width, (v_h / dh_v * img_v.height), hx + actual_size - dw_v + 2, v_y, dw_v, v_h)
+                    end
+
+                    -- 3. BOTTOM SIDE: Reverted (Now starts at hx)
+                    local draw_x_b = hx + dist + 2
+                    local bottom_limit = hx + actual_size + (2 * scale)
+                    local v_x_b = math.max(hx, math.min(bottom_limit, draw_x_b))
+                    local v_w_b = math.min(bottom_limit, draw_x_b + dw_h) - v_x_b
+                    if v_w_b > 0 then
+                        local s_x_b = (v_x_b > draw_x_b) and ((v_x_b - draw_x_b) / dw_h * img_h.width) or 0
+                        img_h.surface:drawtoscreen(s_x_b, 0, (v_w_b / dw_h * img_h.width), img_h.height, v_x_b, hy + actual_size, v_w_b, dh_h)
+                    end
+
+                    -- 4. LEFT SIDE: Original
+                    local draw_y_l = hy + dist + 2
+                    local v_y_l = math.max(hy, math.min(hy + actual_size, draw_y_l))
+                    local v_h_l = math.min(hy + actual_size, draw_y_l + dh_v) - v_y_l
+                    if v_h_l > 0 then
+                        local s_y_l = (v_y_l > draw_y_l) and ((v_y_l - draw_y_l) / dh_v * img_v.height) or 0
+                        img_v.surface:drawtoscreen(0, s_y_l, img_v.width, (v_h_l / dh_v * img_v.height) + 2, hx, v_y_l, dw_v, v_h_l)
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+local pulse_timer = 0 
+
+hilightabilities2 = function()
+    local scale = uiscale or 1
+    if scale <= 0 then scale = 1 end
+    
+    if pulsetimer == nil then pulsetimer = 0 end
+
+    if checkframe then
+        pulsetimer = pulsetimer + 0.5 
+    end
+
+    local sin = (math.sin(pulsetimer) + 1) / 2
+    local alpha = 0.4 + (0.6 * sin)
+
+    local sizemod = 1.05 + (0.05 * sin)
+    local animatedsize = (32 * scale) * sizemod
+    
+    local offset = (animatedsize - (32 * scale)) / 2
+
+    if images.outline and images.outline.surface then images.outline.surface:setalpha(alpha) end
+    if images.outlinegrey and images.outlinegrey.surface then images.outlinegrey.surface:setalpha(alpha) end
+    if images.outlinehighprio and images.outlinehighprio.surface then images.outlinehighprio.surface:setalpha(alpha) end
+
+    for name, ability in pairs(abilities) do
+        if ability.hilight and ability.active then
+            local img = images.outline
+            if ability.isgrey then
+                img = images.outlinegrey
+            elseif ability.highprio ~= nil then
+                img = images.outlinehighprio
+            end
+
+            if img and img.surface then
+                img.surface:drawtoscreen(
+                    0, 0, img.width, img.height,
+                    ability.x - offset, ability.y - offset,
+                    animatedsize, animatedsize
+                )
+            end
+        end
+    end
 end
 
 stats = {
@@ -314,7 +463,6 @@ rendericonlookup1 = {
           local x1, y1, _, _ = event:xywh()
           name.x = x1
           name.y = y1
-          name.isequipped = false
           return nil, buffs.soulfire
       end
       return nil, nil
@@ -379,6 +527,10 @@ setabilitydetails = function (ability, exists, x, y, h, w, scale, isoncd, cdnumb
     ability.y = y
     ability.active = true
     ability.isoncd = isoncd
+    if isoncd == false then ability.cdmax = nil end
+    if ability.cdmax == nil or cdnumber > ability.cdmax then
+      ability.cdmax = cdnumber
+    end
     ability.cdnumber = cdnumber
     ability.foundoncheckframe = true
     ability.hilight = false
@@ -390,51 +542,66 @@ setabilitydetails = function (ability, exists, x, y, h, w, scale, isoncd, cdnumb
   end
 end
 
-lookupchar = function (event, ax, ay, aw, ah)
-  local chars, row1
-  chars = cdchars
-  row1 = 14
-
-  if ah <= row1 then
-    -- safety check on image size
-    return nil
+local function lookupchar(event, ax, ay, aw, ah)
+  if ah >= 15 then
+    local rawData = event:texturedata(ax, ay + 14, aw * 4)
+    return cdchars[rawData]
+  
+  elseif ah == 10 then
+    local rawData = event:texturedata(ax, ay + 5, aw * 4)
+    return cdcharstop[rawData]
   end
-
-  local char = chars[event:texturedata(ax, ay + row1, aw * 4)]
-  local rawData = event:texturedata(ax, ay + row1, aw * 4)
-  local char = chars[rawData]
-
-  return char
+  return nil
 end
 
-tryreadabilitycd = function (event, startindex, pxleft, pxtop)
-
-  local emptyhandler = function () end
-  local handlers = {
-    [':'] = emptyhandler,
+local function tryreadabilitycd(event, startindex, pxleft, pxtop)
+  local details = { 
+    number = nil,
+    minutes = 0,
+    foundseparator = false 
   }
 
+  local handlers = {}
   for i = 0, 9 do
-    handlers[i] = function (details)
-      if details.number ~= nil then
-        details.number = i + (details.number * 10)
+    handlers[i] = function (d)
+      if d.number == nil then
+        d.number = i
       else
-        details.number = i
+        d.number = (d.number * 10) + i
       end
     end
   end
 
-  local vertexcount = event:vertexcount()
-  local verticesperimage = event:verticesperimage()
-  local details = {}
 
-  for i = startindex, vertexcount, verticesperimage do
-    local ax, ay, aw, ah, _, _ = event:vertexatlasdetails(i)
-    local char = lookupchar(event, ax, ay, aw, ah)
-    local handler = handlers[char]
-    if not handler then return nil end
-    handler(details)
+  handlers[':'] = function(d)
+    if d.number ~= nil then
+      d.minutes = d.number
+      d.number = nil
+      d.foundseparator = true
+    end
   end
+
+  for i = startindex, event:vertexcount(), event:verticesperimage() do
+    local ax, ay, aw, ah = event:vertexatlasdetails(i)
+    if not ax then break end
+
+    local char = lookupchar(event, ax, ay, aw, ah)
+
+    if char == "STOP" then break end
+
+    local handler = handlers[char]
+    if handler then
+      handler(details)
+    elseif details.number ~= nil then
+      break
+    end
+  end
+
+  if details.foundseparator then
+    return (details.minutes * 60) + (details.number or 0)
+  end
+
+  return details.number
 end
 
 gamewidth = 0
@@ -460,14 +627,6 @@ bolt.onrender2d(function (event)
 
   local vertexcount = event:vertexcount()
   local verticesperimage = event:verticesperimage()
-
-  elements.slotbg = {}
-  elements.cdnum = {}
-  elements.eqslot = {}
-  while #elements.slotinput > 0 do
-        table.remove(elements.slotinput)
-  end
-
 
   for i = 1, vertexcount, verticesperimage do
     uiscale = event:targetscale(i)
@@ -536,13 +695,13 @@ bolt.onrender2d(function (event)
             table.insert(elements.cdnum, current_instance)
           end
       end
-        if aw == 36 and ah == 36 then
-          if event:texturecompare(ax, ay + 18, "\x4a\x44\x40\x55\x4a\x44\x40\xac\x0e\x08\x04\xa0\x13\x0d\x09\x8c\x16\x10\x0c\x7d\x1b\x15\x11\x73\x20\x1a\x16\x6e\x23\x1d\x19\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x23\x1d\x19\x6e\x20\x1a\x16\x6e\x1b\x15\x11\x73\x16\x10\x0c\x7d\x13\x0d\x09\x8c\x0e\x08\x04\xa0\x4a\x44\x40\xac\x4a\x44\x40\x55") then
-                local current_instance = {}
-                readuielement(current_instance, true)
-                table.insert(elements.eqslot, current_instance)
-          end
+      if aw == 36 and ah == 36 then
+        if event:texturecompare(ax, ay + 18, "\x4a\x44\x40\x55\x4a\x44\x40\xac\x0e\x08\x04\xa0\x13\x0d\x09\x8c\x16\x10\x0c\x7d\x1b\x15\x11\x73\x20\x1a\x16\x6e\x23\x1d\x19\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x26\x20\x1c\x6e\x23\x1d\x19\x6e\x20\x1a\x16\x6e\x1b\x15\x11\x73\x16\x10\x0c\x7d\x13\x0d\x09\x8c\x0e\x08\x04\xa0\x4a\x44\x40\xac\x4a\x44\x40\x55") then
+              local current_instance = {}
+              readuielement(current_instance, true)
+              table.insert(elements.eqslot, current_instance)
         end
+      end
     end
   end
 
@@ -595,25 +754,22 @@ bolt.onrender2d(function (event)
 
             if x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1 then
                 isoncd = true
-                cdnumber = tryreadabilitycd(event, c + verticesperimage, pxleft, pxtop)
+                cdnumber = tryreadabilitycd(event, i + verticesperimage, pxleft, pxtop)
                 break
             end
         end
         local imgdata = ability.img or ""
         if isability and not ability.img then
           for i = 0, ah - 1 do
-              -- We move the 'y' coordinate down by 1 pixel each iteration
               local bytes = event:texturedata(ax, ay + i, aw * 4)
-              --print(bytes)
               imgdata = imgdata .. bytes
           end
-          --imgdata = event:texturedata(ax, ay, aw, ah)
         end
 
         local abilityw = ah
         local abilityh = aw
         local scale = event:targetscale(i)
-        if isability then setabilitydetails(ability, exists, pxlefts, pxtops, abilityw, abilityh, scale, isoncd, cdnumber, isgrey, imgdata) end
+        if isability then setabilitydetails(ability, exists, pxlefts, pxtops, abilityh, abilityw, scale, isoncd, cdnumber, isgrey, imgdata) end
       end
       if aw == ah then
         if aw == 60 then
@@ -632,6 +788,8 @@ bolt.onrender2d(function (event)
                     readability(abilities.spec, true)
           elseif event:texturecompare(ax, ay + 30, "\x0e\x12\x2d\xff\x0f\x09\x1a\xff\x07\x12\x1a\xff\x06\x15\x23\xff\x06\x15\x23\xff\x06\x15\x23\xff\x03\x0e\x3e\xff\x03\x2e\x4f\xff\x0e\x40\x50\xff\x0e\x40\x50\xff\x01\x2e\x70\xff\x01\x15\x9a\xff\x02\x1c\xb9\xff\x01\x1e\xeb\xff\x0d\x9d\xc3\xff\x1e\xf0\x5c\xff\x2b\xf2\x11\xff\x2b\xf2\x11\xff\x08\xc1\x10\xff\x08\xc1\x10\xff\x2b\xf2\x11\xff\x2b\xf2\x11\xff\x0c\x84\x91\xff\x01\x1e\xeb\xff\x03\x3f\xea\xff\x22\xe0\x8b\xff\x2b\xf2\x11\xff\x2b\xf2\x11\xff\x08\xc1\x10\xff\x07\x9f\x0f\xff\x08\xc1\x10\xff\x2a\xc0\x11\xff\x18\xb0\x40\xff\x04\x89\xd8\xff\x03\x3f\xea\xff\x03\x42\xb6\xff\x0c\x5f\x85\xff\x0c\x5f\x85\xff\x01\x15\x9a\xff\x02\x1c\xb9\xff\x0c\x7f\xb6\xff\x22\xe0\x8b\xff\x50\xf0\x34\xff\x2b\xf2\x11\xff\x0c\xe0\x0c\xff\x0c\xe0\x0c\xff\x1c\xeb\x34\xff\x50\xf0\x34\xff\x1e\xf0\x5c\xff\x18\xb2\x8c\xff\x02\x5d\x9e\xff\x02\x1c\xb9\xff\x02\x1c\xb9\xff\x01\x15\x9a\xff\x01\x15\x81\xff\x04\x31\x5e\xff\x0e\x40\x50\xff\x0e\x2f\x4f\xff\x01\x0f\x52\xff\x0d\x21\x3d\xff") then
                     readability(abilities.smtendrils, true)
+          elseif event:texturecompare(ax, ay + 30, "\x21\x0e\x34\xff\x21\x0e\x34\xff\x02\x08\x13\xff\x02\x08\x13\xff\x02\x08\x13\xff\x02\x0a\x1c\xff\x02\x0a\x1c\xff\x06\x15\x23\xff\x03\x1c\x30\xff\x0d\x1d\x30\xff\x0d\x1d\x30\xff\x0d\x1d\x30\xff\x0d\x21\x3d\xff\x0d\x21\x3d\xff\x0d\x21\x3d\xff\x0e\x2f\x4f\xff\x19\x38\x5e\xff\x18\x38\x6d\xff\x22\x4e\x80\xff\x22\x4e\x80\xff\x1f\x63\x99\xff\x46\x6e\xb3\xff\x5d\xae\xf5\xff\x5d\xae\xf5\xff\x5b\x99\xd9\xff\x41\x6c\x9a\xff\x80\x93\x9b\xff\xea\xc8\xb2\xff\xef\xd8\xbe\xff\xea\xc8\xb2\xff\xd3\xa9\x95\xff\xd3\xa9\x95\xff\xd9\xb8\x9b\xff\xe6\xbc\x9e\xff\xd9\xb8\x9b\xff\xd3\xa9\x95\xff\xa7\x76\x67\xff\x4b\x1f\x0e\xff\x2d\x05\x03\xff\x2d\x05\x03\xff\x4b\x1f\x0e\xff\xa7\x76\x67\xff\xe6\xbc\x9e\xff\xea\xc8\xb2\xff\xea\xc8\xb2\xff\xea\xc8\xb2\xff\xea\xc8\xb2\xff\xef\xd8\xbe\xff\xef\xd8\xbe\xff\xea\xc8\xb2\xff\xea\xc8\xb2\xff\xea\xc8\xb2\xff\xe6\xbc\x9e\xff\xe6\xbc\x9e\xff\xe6\xbc\x9e\xff\xe6\xbc\x9e\xff\xd0\x96\x79\xff\x81\x42\x15\xff\x49\x0b\x05\xff\x3e\x18\x38\xff") then
+                    readability(abilities.asphyxiate, true)
           elseif event:texturecompare(ax, ay + 30, "\x1e\x31\x4a\xff\x19\x38\x5e\xff\x0e\x2f\x4f\xff\x03\x21\x3e\xff\x03\x21\x3e\xff\x03\x21\x3e\xff\x03\x21\x3e\xff\x03\x20\x51\xff\x0e\x2f\x4f\xff\x03\x2e\x4f\xff\x03\x21\x3e\xff\x03\x21\x3e\xff\x03\x20\x51\xff\x03\x20\x51\xff\x03\x20\x51\xff\x01\x2e\x70\xff\x08\x50\x87\xff\x0c\x5f\x85\xff\x0e\x61\x9c\xff\x0c\x84\x91\xff\x0c\x84\x91\xff\x0c\x7f\xb6\xff\x0c\x7f\xb6\xff\x09\x6d\xb0\xff\x03\x50\x9a\xff\x01\x2e\x70\xff\x04\x31\x5e\xff\x03\x20\x51\xff\x03\x21\x3e\xff\x03\x1c\x30\xff\x02\x10\x2d\xff\x03\x1c\x30\xff\x03\x1c\x30\xff\x03\x21\x3e\xff\x03\x21\x3e\xff\x03\x21\x3e\xff\x0e\x2f\x4f\xff\x04\x31\x5e\xff\x04\x40\x7f\xff\x02\x5d\x9e\xff\x04\x40\x7f\xff\x3e\x18\x38\xff\xd3\x07\x02\xff\xef\x39\x07\xff\xef\x39\x07\xff\xf1\x9b\x19\xff\xf1\x66\x10\xff\xef\x39\x07\xff\xd3\x07\x02\xff\x8a\x06\x03\xff\x8a\x06\x03\xff\x3e\x18\x38\xff\x38\x43\x69\xff\x18\x38\x6d\xff\x03\x20\x51\xff\x03\x21\x3e\xff\x03\x21\x3e\xff\x03\x1c\x30\xff\x06\x15\x23\xff\x16\x18\x1c\xff") then
                     readability(abilities.omnipower, true)
           elseif event:texturecompare(ax, ay + 30, "\x90\x3f\x3b\xff\x9d\x35\x39\xff\xa5\x2c\x3b\xff\xb0\x22\x3b\xff\xc0\x15\x34\xff\xca\x09\x32\xff\xd5\x05\x2e\xff\xdc\x07\x2d\xff\xe4\x12\x2b\xff\xf2\x26\x26\xff\xff\x47\x18\xff\xff\x6c\x1d\xff\xd2\x87\x50\xff\x89\x90\x91\xff\x50\x90\xc2\xff\x32\x91\xde\xff\x1f\x92\xed\xff\x1f\x95\xed\xff\x33\x98\xde\xff\x53\x94\xbf\xff\x8a\x90\x8f\xff\xcd\x8d\x58\xff\xf4\x7e\x35\xff\xef\x63\x37\xff\xe5\x53\x43\xff\xed\x5a\x46\xff\xff\x76\x38\xff\xdd\x93\x5c\xff\x34\xc7\xeb\xff\x4e\xff\xff\xff\x32\xef\xfb\xff\x07\xde\xfd\xff\x0f\xe8\xff\xff\x13\xf5\xff\xff\x15\xfb\xff\xff\x19\xff\xff\xff\x10\xc4\xcf\xff\x05\x5f\x78\xff\x05\x5e\x74\xff\x04\x5e\x73\xff\x09\x8f\x9d\xff\x1d\xff\xfc\xff\x19\xea\xea\xff\x10\xb5\xbf\xff\x0e\xa1\xb3\xff\x11\xa8\xbc\xff\x15\xc6\xda\xff\x1a\xe6\xfb\xff\x1c\xed\xff\xff\x1c\xe5\xfe\xff\x0f\xd5\xff\xff\x27\xb2\xf2\xff\xce\x9c\x6d\xff\xd3\x74\x43\xff\x99\x4b\x47\xff\x69\x2e\x44\xff\x3f\x1f\x42\xff\x20\x16\x40\xff\x0e\x12\x3e\xff\x06\x11\x3b\xff") then
@@ -905,11 +1063,12 @@ bolt.onrendericon(function (event)
     nextrender2dpxleft, nextrender2dpxtop, _, _ = event:xywh()
     -- checks if the player has anything under the equipment table equipped
     for key, name in pairs(equipment) do
+
       local x1, y1 = name.x, name.y
       for c = 1, #elements.eqslot do
         local cd = elements.eqslot[c]
         local w1, h1 = 32, 32
-        local x2, y2 = cd.x, cd.y
+        local x2, y2 = cd.xs, cd.ys
         local w2, h2 = 36, 36
         x1 = x1 or 0
         y1 = y1 or 0
@@ -952,10 +1111,15 @@ endcheckframe = function (t)
     end
   end
   for _, ability in pairs(abilities) do
+    ability.highprio = nil
     if not ability.foundoncheckframe then
         ability.active = false
     end
   end
+  elements.eqslot = {}
+  elements.slotbg = {}
+  elements.cdnum = {}
+  elements.slotinput = {}
 end
 
 bolt.onswapbuffers (function (event)

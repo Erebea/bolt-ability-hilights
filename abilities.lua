@@ -5,6 +5,7 @@ abilities = {
   sonic = {},
   conc = {},
   wildmagic = {},
+  asphyxiate = {},
   cblast = {},
   smtendrils = {},
   sunshine = {},
