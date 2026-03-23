@@ -5,7 +5,7 @@ The aim of this plugin is to hilight certain abilities when you are expected to 
 
 **100% compatible with interface scaling with no extra compromises**
 
-**This is WIP. There is a simple hilights file that includes simple hilights listed below, but there is also an advanced hilights file that aims to enable the player to pick up their rotation at any point, and simply follow for competent damage**
+**This is WIP. There is a simple hilights file that includes simple hilights listed below, but there is also an advanced hilights file that aims to enable the player to pick up their rotation at any point, and simply follow for competent damage. Currently, the advanced version (which is still in the process of being populated) is default.**
 
 ## Previews:
 
