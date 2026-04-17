@@ -1314,7 +1314,7 @@ bolt.onrender2d(function (event)
       end
     end
   end
-  --if elements.cd.foundoncheckframe then
+  --[[if elements.cd.foundoncheckframe then
     for b = 1, #elements.slotinput do
         local slot = elements.slotinput[b]
         inputimg = images.inputimg
@@ -1346,6 +1346,7 @@ bolt.onrender2d(function (event)
         end
     end
 --end
+--]]
 end)
 
 bolt.onrender3d(function (event)
