@@ -1466,7 +1466,7 @@ bolt.onswapbuffers (function (event)
     end
     startcheckframe(t)
   end
-  if (elements.bank.active or elements.central.active or elements.lobby.active or elements.bankpresets.active) and not elements.loot.active then
+  if (elements.bank.active or elements.central.active or elements.lobby.active or elements.bankpresets.active) then
     return
   else
 
