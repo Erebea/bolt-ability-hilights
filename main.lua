@@ -1314,12 +1314,12 @@ bolt.onrender2d(function (event)
       end
     end
   end
-  --[[if elements.cd.foundoncheckframe then
+  --if elements.cd.foundoncheckframe then
     for b = 1, #elements.slotinput do
         local slot = elements.slotinput[b]
         inputimg = images.inputimg
         inputimg.surface:drawtoscreen(0, 0, inputimg.width, inputimg.height, slot.x, slot.y, inputimg.width, inputimg.height)
-        -- Use pairs() to iterate through the dictionary of abilities
+        --[[ Use pairs() to iterate through the dictionary of abilities
         for name, ability in pairs(abilities) do
             -- Only check abilities that were actually found on screen this frame
             if ability.active and ability.img then
@@ -1343,10 +1343,9 @@ bolt.onrender2d(function (event)
             elseif ability.active and not ability.img then
                 -- This will tell you if the ability was found but the image wasn't captured
             end
-        end
+        end--]]
     end
 --end
---]]
 end)
 
 bolt.onrender3d(function (event)
@@ -1466,7 +1465,7 @@ bolt.onswapbuffers (function (event)
     end
     startcheckframe(t)
   end
-  if (elements.bank.active or elements.central.active or elements.lobby.active or elements.bankpresets.active) and not elements.loot.active then
+  if (elements.bank.active or elements.central.active or elements.lobby.active or elements.bankpresets.active) then
     return
   else
 
