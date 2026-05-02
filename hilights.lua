@@ -1,6 +1,6 @@
 drawhilights = function()
 
---if cbstyle == "magic" then
+--if cbstyle == "magic" then                                     MAGIC HILIGHTS HERE
   local function critablesused()
     return (
         --checks if any of these abilities have a cooldown elapsed time of 2 or under; basically, if they've been used in the last global cooldown
@@ -69,7 +69,10 @@ drawhilights = function()
 
 
 
---elseif cbstyle == "melee" then
+--elseif cbstyle == "melee" then                      MELEE HILIGHTS HERE
+  abilities.meteor.highprio = true
+  abilities.berserk.highprio = true
+  abilities.overpower.highprio = true
   abilities.assault.hilight = buffs.bloodlust.active and (buffs.bloodlust.number or 0) >= 4 or false
   abilities.flurry.hilight = buffs.bloodlust.active and (buffs.bloodlust.number or 0) >= 4 or false
   abilities.hurricane.hilight = buffs.bloodlust.active and (buffs.bloodlust.number or 0) >= 4 or false
@@ -85,17 +88,35 @@ drawhilights = function()
 
 
 
---elseif cbstyle == "ranged" then
+--elseif cbstyle == "ranged" then                           RANGED HILIGHTS HERE
+  abilities.deathsswiftness.highprio = true
+  abilities.deadshot.highprio = true
+  abilities.shtendrils.highprio = true
+  abilities.rapidfire.highprio = true
+
+  -- hilight galeshot if it's ready to be used, rapid fire is not on cooldown, and death's swiftness IS on cooldown (making sure you aren't using up a galeshot when you can use death's swiftness first)
   abilities.galeshot.hilight = not abilities.galeshot.isgrey and not abilities.galeshot.isoncd and not abilities.rapidfire.isoncd and (abilities.deathsswiftness.isoncd or abilities.deathsswiftness.isoncd)
+
+  -- hilight shadow tendrils when under the shadows buff
   abilities.shtendrils.hilight = buffs.shadows.active and not abilities.shtendrils.isoncd
+
+  -- hilight rapid fire when the searing winds buff is active
   abilities.rapidfire.hilight = buffs.winds.active and not abilities.rapidfire.isoncd
-  abilities.deathsswiftness.hilight = not abilities.deathsswiftness.isgrey and not (buffs.deathsswiftness.active or buffs.gdeathsswiftness.active) and not abilities.deathsswiftness.isoncd
+
+  -- check if deathspore effect is actually active
+  sporesactive = buffs.spore.number and not buffs.spore.parensnumber and buffs.sporecd.active
+
+  -- hilight death's swiftness when it's ready to be used and the deathspore effect is active
+  abilities.deathsswiftness.hilight = sporesactive and not abilities.deathsswiftness.isgrey and not (buffs.deathsswiftness.active or buffs.gdeathsswiftness.active) and not abilities.deathsswiftness.isoncd
+
+  -- hilight shadows when it's ready to be used and death's swiftness is active
   abilities.shadows.hilight = not abilities.shadows.isgrey and (buffs.deathsswiftness.active or buffs.gdeathsswiftness.active) and not abilities.shadows.isoncd
 
+  -- hilight deadshot when it's ready to be used, when death's swiftness and searing winds are active or their abilities are on cooldown
+  abilities.deadshot.hilight = not abilities.deadshot.isgrey and not abilities.deadshot.isoncd and (((buffs.deathsswiftness.active or buffs.gdeathsswiftness.active) and buffs.winds.active) or (abilities.deathsswiftness.isoncd and abilities.galeshot.isoncd))
 
 
-
---elseif cbstyle == "necromancy" then
+--elseif cbstyle == "necromancy" then                                NECROMANCY HILIGHTS HERE
   -- generally living death, skulls, conjure, and cmd ghost are high priority
   abilities.conjarmy.highprio = true
   abilities.conjskele.highprio = true
