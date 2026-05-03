@@ -26,7 +26,7 @@ drawhilights = function()
   abilities.shadows.hilight = not abilities.shadows.isgrey and (buffs.deathsswiftness.active or buffs.gdeathsswiftness.active) and not abilities.shadows.isoncd
 
   abilities.finger.hilight = buffs.necrosis.active and (buffs.necrosis.number or 0) >= 6 or false
-  abilities.volley.hilight = buffs.residualsouls.active and ((equipment.t95lantern.x and (buffs.residualsouls.parensnumber or buffs.residualsouls.number or 0) == 5) or (not equipment.t95lantern.x and (buffs.residualsouls.parensnumber or buffs.residualsouls.number or 0) == 3))
+  abilities.volley.hilight = buffs.residualsouls.active and ((equipment.sblantern.x and (buffs.residualsouls.parensnumber or buffs.residualsouls.number or 0) == 5) or (not equipment.sblantern.x and (buffs.residualsouls.parensnumber or buffs.residualsouls.number or 0) == 3))
   abilities.cmdzom.hilight = buffs.putridzombie.active and (buffs.putridzombie.number or 0) <=5 or false
   abilities.cmdphant.hilight = buffs.phantomguardian.active and (buffs.phantomguardian.parensnumber or 0) >= 13 or false
   abilities.skulls.hilight = buffs.livingdeath.active and not abilities.skulls.isoncd
