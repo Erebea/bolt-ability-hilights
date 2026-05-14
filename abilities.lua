@@ -8,6 +8,7 @@ abilities = {
   asphyxiate = {},
   cblast = {},
   smtendrils = {},
+  magma = {},
   sunshine = {},
   omnipower = {},
   assault = {},
